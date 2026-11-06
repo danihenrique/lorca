@@ -263,11 +263,11 @@ type providerCustomSheet struct {
 	name, baseURL, key string
 	api                model.CustomAPI
 	// sync sends it to every Device; a provider this Device keeps starts with it off.
-	sync               bool
-	checklist          model.ModelChecklist
-	search             string
-	listing            providerListing
-	failure            string
+	sync      bool
+	checklist model.ModelChecklist
+	search    string
+	listing   providerListing
+	failure   string
 
 	busy   bool
 	status *providerStatus
