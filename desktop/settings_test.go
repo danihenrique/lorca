@@ -214,6 +214,31 @@ func TestSettingsReviewsWith(t *testing.T) {
 	}
 }
 
+// Check Again has nothing to click while it asks Claude Code, then says when it asked.
+func TestSettingsCheckAgainSaysWhenItChecked(t *testing.T) {
+	m, tt := settingsWindowTester(t, 1100)
+	m.showSettings(model.PaneProviders)
+	settle(tt)
+	checked := L("Checked %@", "")
+	if tt.HasText(checked) {
+		t.Fatalf("checked before asking in %q", tt.Texts())
+	}
+	if err := tt.Click(L("Check Again")); err != nil {
+		t.Fatal(err)
+	}
+	if !store.ClaudeCodeChecking {
+		t.Error("not checking after the click")
+	}
+	settle(tt)
+	if store.ClaudeCodeChecking {
+		t.Error("still checking after the answer")
+	}
+	if !tt.HasText(checked) {
+		t.Errorf("no %q in %q", checked, tt.Texts())
+	}
+	renderBoth(t, tt, "settings-check-again")
+}
+
 // Review Models picks each connected provider's review model: its default, named by the provider's
 // status, or any of its models, decision models included.
 func TestSettingsReviewModels(t *testing.T) {

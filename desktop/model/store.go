@@ -133,6 +133,10 @@ func ErrorText(err error) string {
 const TaskDelay = 2 * time.Second
 
 type Store struct {
+	// ClaudeCodeChecking is a Check Again under way, and ClaudeCodeCheckedAt when the last one ended.
+	ClaudeCodeChecking  bool
+	ClaudeCodeCheckedAt time.Time
+
 	// IsMock is the seeded demo (`LORCA_MOCK=1`), which runs without a CLI.
 	IsMock    bool
 	transport Transport
@@ -3326,8 +3330,15 @@ func (s *Store) SetProviderSync(kind ProviderKind, sync bool, done func(error)) 
 // CheckClaudeCode asks Claude Code on this computer whether it is signed in now
 // (`providers.check_claude_code`), and fails with what to do when it is not.
 func (s *Store) CheckClaudeCode(done func(error)) {
+	s.ClaudeCodeChecking = true
+	s.rosterTouched("")
+	finish := func(err error) {
+		s.ClaudeCodeChecking, s.ClaudeCodeCheckedAt = false, time.Now()
+		s.rosterTouched("")
+		done(err)
+	}
 	if s.IsMock {
-		s.post(func() { done(nil) })
+		s.post(func() { finish(nil) })
 		return
 	}
 	Async(s, func() ([]ProviderCredential, error) {
@@ -3347,8 +3358,16 @@ func (s *Store) CheckClaudeCode(done func(error)) {
 			}
 			err = errors.New(detail)
 		}
-		done(err)
+		finish(err)
 	})
+}
+
+// ClaudeCodeChecked says when this app last asked Claude Code, empty before it has.
+func (s *Store) ClaudeCodeChecked() string {
+	if s.ClaudeCodeCheckedAt.IsZero() {
+		return ""
+	}
+	return L("Checked %@", DateTime(s.ClaudeCodeCheckedAt))
 }
 
 // CancelSignIn stops a sign-in that is waiting on the browser.

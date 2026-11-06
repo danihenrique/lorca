@@ -200,9 +200,11 @@ type statusRowOptions struct {
 	// StateDetail is what a state that needs something says in full, a click on the state away.
 	StateDetail string
 	ActionTitle string
-	Destructive bool
-	Clickable   bool
-	Tooltip     string
+	// ActionDisabled shows the action with nothing to click.
+	ActionDisabled bool
+	Destructive    bool
+	Clickable      bool
+	Tooltip        string
 }
 
 type statusRowResult struct {
@@ -250,7 +252,7 @@ func statusRow(c *ui.Context, k *card, o statusRowOptions) (ui.Element, statusRo
 			if o.Destructive {
 				kind = buttonDestructive
 			}
-			result.Action = pushButton(c, o.ActionTitle, pushOptions{Kind: kind, Small: true}).Clicked()
+			result.Action = pushButton(c, o.ActionTitle, pushOptions{Kind: kind, Small: true, Disabled: o.ActionDisabled}).Clicked()
 		case o.State != "":
 			tint := p.Label2
 			if o.StateColor != nil {

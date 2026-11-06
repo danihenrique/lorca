@@ -29,15 +29,19 @@ func (s settingsPane) providers(c *ui.Context) {
 					action = L("Check Again")
 				}
 				subtitle := model.ProviderSubtitle(kind) + " · " + credential.Detail
+				if checked := store.ClaudeCodeChecked(); kind == model.ClaudeCode && checked != "" {
+					subtitle += " · " + checked
+				}
 				if credential.IsConnected && credential.Kept && kind != model.ClaudeCode {
 					subtitle += " · " + L("Kept on this Device")
 				}
 				o := statusRowOptions{
-					Symbol:      model.ProviderSymbol(kind),
-					Title:       model.ProviderName(kind, store.Providers),
-					Subtitle:    subtitle,
-					StateColor:  &p.Green,
-					ActionTitle: action,
+					Symbol:         model.ProviderSymbol(kind),
+					Title:          model.ProviderName(kind, store.Providers),
+					Subtitle:       subtitle,
+					StateColor:     &p.Green,
+					ActionTitle:    action,
+					ActionDisabled: kind == model.ClaudeCode && store.ClaudeCodeChecking,
 				}
 				if credential.IsConnected {
 					o.State = L("Connected")

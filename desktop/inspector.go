@@ -420,10 +420,11 @@ func (m *mainWindow) inspectorRuntime(c *ui.Context, bot *model.Bot) {
 			// Kept on other Runners than the bot's.
 			value = credential.Detail
 		}
+		options := actionRowOptions{Value: value, Tint: &tint, Action: action}
 		if bot.Provider == model.ClaudeCode {
-			action = L("Check Again")
+			options.Action, options.Busy, options.Tooltip = L("Check Again"), store.ClaudeCodeChecking, store.ClaudeCodeChecked()
 		}
-		if _, result := actionRow(c, k, L("Credential"), actionRowOptions{Value: value, Tint: &tint, Action: action}); result.Action {
+		if _, result := actionRow(c, k, L("Credential"), options); result.Action {
 			if bot.Provider == model.ClaudeCode {
 				store.CheckClaudeCode(func(err error) {
 					if err != nil {
